@@ -101,18 +101,18 @@ source ~/.zshrc
 ```json
 {
   "hooks": {
-    "Notification": [
+    "PreToolUse": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/skills/slack-notifier/scripts/slack-notify.sh"
+            "command": "python3 ~/.claude/skills/telegram-notifier/scripts/save_tool_context.py"
           }
         ]
       }
     ],
-    "Stop": [
+    "Notification": [
       {
         "matcher": "",
         "hooks": [
@@ -127,7 +127,10 @@ source ~/.zshrc
 }
 ```
 
-> **참고**: Claude Code는 알림 정보를 stdin을 통해 JSON으로 전달합니다.
+> **참고**:
+> - `PreToolUse` hook: 도구 실행 전 컨텍스트(명령어, 파일 경로 등)를 임시 파일에 저장
+> - `Notification` hook: 알림 발송 시 저장된 컨텍스트를 읽어 상세 정보 포함
+> - `save_tool_context.py`는 telegram-notifier 스킬에서 제공 (공용 스크립트)
 
 ## 사용법
 
@@ -135,15 +138,19 @@ source ~/.zshrc
 
 설정 완료 후 Claude Code가 다음 상황에서 자동으로 Slack 알림을 발송합니다:
 
-| 이벤트 | 아이콘 | 설명 |
-|--------|--------|------|
-| `Notification` (input_required) | 🔔 | 사용자 입력이 필요할 때 |
-| `Stop` (end_turn) | ✅ | 작업이 완료되었을 때 |
+| 알림 유형 | 아이콘 | 설명 |
+|-----------|--------|------|
+| `permission_prompt` | 🔐 | 명령어 실행 권한 요청 (예: git push) |
+| `idle_prompt` | ⏳ | 60초 이상 사용자 응답 대기 |
+| `auth_success` | ✅ | 인증 완료 알림 |
+| `elicitation_dialog` | 💬 | MCP 도구가 추가 입력 요청 |
 
 예시 알림 메시지:
 ```
-🔔 *[입력 필요]*
-계속 진행하시겠습니까?
+🔐 *권한 요청*
+Tool: Bash
+git push origin main
+Push commits to remote
 
 📁 Project: `my-project`
 ```
@@ -151,7 +158,7 @@ source ~/.zshrc
 ### 수동 알림 테스트
 
 ```bash
-echo '{"message": "테스트 메시지", "type": "info"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
+echo '{"message": "테스트 메시지", "notification_type": "idle_prompt"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
 ```
 
 ## 파일 구조
