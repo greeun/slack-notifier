@@ -28,18 +28,18 @@ export SLACK_CHANNEL="C01234567"
 ```json
 {
   "hooks": {
-    "Notification": [
+    "PreToolUse": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/skills/slack-notifier/scripts/slack-notify.sh"
+            "command": "python3 ~/.claude/skills/telegram-notifier/scripts/save_tool_context.py"
           }
         ]
       }
     ],
-    "Stop": [
+    "Notification": [
       {
         "matcher": "",
         "hooks": [
@@ -54,19 +54,24 @@ export SLACK_CHANNEL="C01234567"
 }
 ```
 
-> **참고**: Claude Code는 stdin을 통해 JSON으로 알림 정보를 전달합니다.
+> **참고**:
+> - `PreToolUse` hook: 도구 실행 전 컨텍스트(명령어, 파일 경로 등)를 임시 파일에 저장
+> - `Notification` hook: 알림 발송 시 저장된 컨텍스트를 읽어 상세 정보 포함
+> - `save_tool_context.py`는 telegram-notifier 스킬에서 제공 (공용 스크립트)
 
 ## 알림 유형
 
 | 유형 | 아이콘 | 설명 |
 |------|--------|------|
-| `input_required` | :bell: | 사용자 입력이 필요할 때 |
-| `end_turn` (Stop) | :white_check_mark: | 작업이 완료되었을 때 |
+| `permission_prompt` | :lock: | 명령어 실행 권한 요청 |
+| `idle_prompt` | :hourglass_flowing_sand: | 60초 이상 사용자 응답 대기 |
+| `auth_success` | :white_check_mark: | 인증 완료 알림 |
+| `elicitation_dialog` | :speech_balloon: | MCP 도구가 추가 입력 요청 |
 
 ## 수동 알림 테스트
 
 ```bash
-echo '{"message": "테스트 메시지", "type": "info"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
+echo '{"message": "테스트 메시지", "notification_type": "idle_prompt"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
 ```
 
 ## Troubleshooting
