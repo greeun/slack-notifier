@@ -1,6 +1,6 @@
 ---
 name: slack-notifier
-description: Send Slack notifications when tasks complete or user input is needed. Use when setting up notifications, configuring slack alerts, or when user says "slack notify", "send slack", "notify me via slack".
+description: Send Slack notifications when tasks complete or user input is needed. Requires telegram-notifier skill for save_tool_context.py. Use when setting up notifications, configuring slack alerts, or when user says "slack notify", "send slack", "notify me via slack".
 ---
 
 # Slack Notifier
