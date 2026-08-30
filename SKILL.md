@@ -1,7 +1,7 @@
 ---
 name: slack-notifier
-description: Send Slack notifications when tasks complete or user input is needed. Requires telegram-notifier skill for save_tool_context.py. Use when setting up notifications, configuring slack alerts, or when user says "slack notify", "send slack", "notify me via slack".
-version: 1.0.0
+description: Send Slack notifications when tasks complete or user input is needed. Use when setting up notifications, configuring slack alerts, or when user says "slack notify", "send slack", "notify me via slack".
+version: 1.1.0
 ---
 
 # Slack Notifier
@@ -35,7 +35,7 @@ export SLACK_CHANNEL="C01234567"
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/skills/telegram-notifier/scripts/save_tool_context.py"
+            "command": "python3 ~/.claude/skills/slack-notifier/scripts/save_tool_context.py"
           }
         ]
       }
@@ -58,7 +58,6 @@ export SLACK_CHANNEL="C01234567"
 > **참고**:
 > - `PreToolUse` hook: 도구 실행 전 컨텍스트(명령어, 파일 경로 등)를 임시 파일에 저장
 > - `Notification` hook: 알림 발송 시 저장된 컨텍스트를 읽어 상세 정보 포함
-> - `save_tool_context.py`는 telegram-notifier 스킬에서 제공 (공용 스크립트)
 
 ## 알림 유형
 

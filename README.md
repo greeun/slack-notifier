@@ -107,7 +107,7 @@ Add hooks to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/skills/telegram-notifier/scripts/save_tool_context.py"
+            "command": "python3 ~/.claude/skills/slack-notifier/scripts/save_tool_context.py"
           }
         ]
       }
@@ -130,7 +130,6 @@ Add hooks to `~/.claude/settings.json`:
 > **Note**:
 > - `PreToolUse` hook: Saves the context (command, file path, etc.) to a temporary file before tool execution
 > - `Notification` hook: Reads the saved context when sending a notification to include detailed information
-> - `save_tool_context.py` is provided by the telegram-notifier skill (a shared script)
 
 ## Usage
 
@@ -168,7 +167,8 @@ echo '{"message": "Test message", "notification_type": "idle_prompt"}' | ~/.clau
 ├── SKILL.md                    # Skill definition
 ├── README.md                   # This document
 ├── scripts/
-│   └── slack-notify.sh         # Slack sending script
+│   ├── slack-notify.sh         # Slack sending script
+│   └── save_tool_context.py    # PreToolUse hook: caches tool context
 └── references/
     └── setup-guide.md          # Detailed setup guide
 ```
