@@ -141,10 +141,22 @@ PAYLOAD=$(jq -n \
         ]
     }')
 
-# Send to Slack
-curl -s -X POST "https://slack.com/api/chat.postMessage" \
+# Send to Slack.
+# Slack returns HTTP 200 even for API errors, with a body of
+# {"ok":false,"error":"..."}, so the response must be inspected instead
+# of discarded - otherwise failures are lost silently.
+RESPONSE=$(curl -s --max-time 10 -X POST "https://slack.com/api/chat.postMessage" \
     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "$PAYLOAD" > /dev/null
+    -d "$PAYLOAD") || {
+    echo "Slack notification failed: curl request error" >&2
+    exit 1
+}
+
+if [[ "$(echo "$RESPONSE" | jq -r '.ok // false')" != "true" ]]; then
+    ERROR=$(echo "$RESPONSE" | jq -r '.error // "unknown error"')
+    echo "Slack notification failed: $ERROR" >&2
+    exit 1
+fi
 
 exit 0

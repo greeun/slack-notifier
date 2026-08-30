@@ -1,22 +1,22 @@
 # Slack Notifier for Claude Code
 
-Claude Code 작업 완료 또는 사용자 입력 대기 시 Slack으로 자동 알림을 보내는 스킬입니다.
+A skill that automatically sends a Slack notification when a Claude Code task completes or is waiting for user input.
 
-## 워크플로우 비교
+## Workflow Comparison
 
 <table>
 <tr>
-<td align="center"><strong>❌ 기존 방식</strong></td>
-<td align="center"><strong>✅ 알림 적용 후</strong></td>
+<td align="center"><strong>❌ Before</strong></td>
+<td align="center"><strong>✅ After enabling notifications</strong></td>
 </tr>
 <tr>
 <td>
 
 ```mermaid
 flowchart TB
-    A1[Claude Code 실행] --> A2[화면 앞 대기]
-    A2 --> A3[계속 확인...]
-    A3 --> A4[완료 확인]
+    A1[Run Claude Code] --> A2[Wait in front of screen]
+    A2 --> A3[Keep checking...]
+    A3 --> A4[Confirm completion]
 
     style A1 fill:#ef4444,color:#fff
     style A2 fill:#ef4444,color:#fff
@@ -29,9 +29,9 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    B1[Claude Code 실행] --> B2[다른 작업]
-    B2 --> B3[💬 Slack 알림]
-    B3 --> B4[복귀]
+    B1[Run Claude Code] --> B2[Other work]
+    B2 --> B3[💬 Slack notification]
+    B3 --> B4[Return]
 
     style B1 fill:#10b981,color:#fff
     style B2 fill:#10b981,color:#fff
@@ -43,13 +43,13 @@ flowchart TB
 </tr>
 </table>
 
-## 시스템 구조
+## System Architecture
 
 ```mermaid
 flowchart LR
     A[Claude Code] -->|Notification/Stop Hook| B[slack-notify.sh]
     B -->|HTTP POST| C[Slack API]
-    C -->|Push| D[💬 Slack 채널]
+    C -->|Push| D[💬 Slack channel]
 
     style A fill:#6366f1,color:#fff
     style B fill:#10b981,color:#fff
@@ -57,46 +57,46 @@ flowchart LR
     style D fill:#f59e0b,color:#fff
 ```
 
-## 설치
+## Installation
 
-### 1. Slack Bot 생성
+### 1. Create a Slack Bot
 
-1. [api.slack.com/apps](https://api.slack.com/apps)에서 **Create New App** 클릭
-2. **From scratch** 선택 후 앱 이름 입력 (예: "Claude Notifier")
-3. **OAuth & Permissions** → **Bot Token Scopes**에서 `chat:write` 추가
-4. **Install to Workspace** 클릭
-5. 발급된 **Bot User OAuth Token** 복사 (`xoxb-`로 시작)
+1. Click **Create New App** at [api.slack.com/apps](https://api.slack.com/apps)
+2. Select **From scratch** and enter an app name (e.g.: "Claude Notifier")
+3. Add `chat:write` under **OAuth & Permissions** → **Bot Token Scopes**
+4. Click **Install to Workspace**
+5. Copy the issued **Bot User OAuth Token** (starts with `xoxb-`)
 
-### 2. 채널 ID 확인
+### 2. Find the Channel ID
 
-1. Slack에서 알림 받을 채널 우클릭
-2. **채널 세부정보 보기** 선택
-3. 맨 아래 **채널 ID** 확인 (예: `C01234567`)
+1. Right-click the channel to receive notifications in Slack
+2. Select **View channel details**
+3. Find the **Channel ID** at the bottom (e.g.: `C01234567`)
 
-### 3. 봇을 채널에 초대
+### 3. Invite the Bot to the Channel
 
 ```
 /invite @Claude Notifier
 ```
 
-### 4. 환경 변수 설정
+### 4. Set Environment Variables
 
-`~/.zshrc` 또는 `~/.bashrc`에 추가:
+Add to `~/.zshrc` or `~/.bashrc`:
 
 ```bash
 export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
 export SLACK_CHANNEL="C01234567"
-# export CLAUDE_SLACK_NOTIFY_ENABLED=false  # 비활성화 시
+# export CLAUDE_SLACK_NOTIFY_ENABLED=false  # to disable
 ```
 
-적용:
+Apply:
 ```bash
 source ~/.zshrc
 ```
 
-### 5. Claude Code Hooks 설정
+### 5. Configure Claude Code Hooks
 
-`~/.claude/settings.json`에 hooks 추가:
+Add hooks to `~/.claude/settings.json`:
 
 ```json
 {
@@ -127,25 +127,25 @@ source ~/.zshrc
 }
 ```
 
-> **참고**:
-> - `PreToolUse` hook: 도구 실행 전 컨텍스트(명령어, 파일 경로 등)를 임시 파일에 저장
-> - `Notification` hook: 알림 발송 시 저장된 컨텍스트를 읽어 상세 정보 포함
-> - `save_tool_context.py`는 telegram-notifier 스킬에서 제공 (공용 스크립트)
+> **Note**:
+> - `PreToolUse` hook: Saves the context (command, file path, etc.) to a temporary file before tool execution
+> - `Notification` hook: Reads the saved context when sending a notification to include detailed information
+> - `save_tool_context.py` is provided by the telegram-notifier skill (a shared script)
 
-## 사용법
+## Usage
 
-### 자동 알림
+### Automatic Notifications
 
-설정 완료 후 Claude Code가 다음 상황에서 자동으로 Slack 알림을 발송합니다:
+After setup, Claude Code automatically sends a Slack notification in the following situations:
 
-| 알림 유형 | 아이콘 | 설명 |
+| Notification type | Icon | Description |
 |-----------|--------|------|
-| `permission_prompt` | 🔐 | 명령어 실행 권한 요청 (예: git push) |
-| `idle_prompt` | ⏳ | 60초 이상 사용자 응답 대기 |
-| `auth_success` | ✅ | 인증 완료 알림 |
-| `elicitation_dialog` | 💬 | MCP 도구가 추가 입력 요청 |
+| `permission_prompt` | 🔐 | Requesting permission to run a command (e.g.: git push) |
+| `idle_prompt` | ⏳ | Waiting for a user response for 60+ seconds |
+| `auth_success` | ✅ | Authentication completed notification |
+| `elicitation_dialog` | 💬 | An MCP tool requests additional input |
 
-예시 알림 메시지:
+Example notification message:
 ```
 🔐 *권한 요청*
 Tool: Bash
@@ -155,49 +155,49 @@ Push commits to remote
 📁 Project: `my-project`
 ```
 
-### 수동 알림 테스트
+### Manual Notification Test
 
 ```bash
-echo '{"message": "테스트 메시지", "notification_type": "idle_prompt"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
+echo '{"message": "Test message", "notification_type": "idle_prompt"}' | ~/.claude/skills/slack-notifier/scripts/slack-notify.sh
 ```
 
-## 파일 구조
+## File Structure
 
 ```
 ~/.claude/skills/slack-notifier/
-├── SKILL.md                    # 스킬 정의
-├── README.md                   # 이 문서
+├── SKILL.md                    # Skill definition
+├── README.md                   # This document
 ├── scripts/
-│   └── slack-notify.sh         # Slack 발송 스크립트
+│   └── slack-notify.sh         # Slack sending script
 └── references/
-    └── setup-guide.md          # 상세 설정 가이드
+    └── setup-guide.md          # Detailed setup guide
 ```
 
-## 문제 해결
+## Troubleshooting
 
-| 문제 | 해결 방법 |
+| Problem | Solution |
 |------|----------|
-| 알림이 오지 않음 | `echo $SLACK_BOT_TOKEN` 으로 환경 변수 확인 |
-| `not_in_channel` 오류 | 봇을 채널에 초대했는지 확인 (`/invite @봇이름`) |
-| `invalid_auth` 오류 | 토큰이 `xoxb-`로 시작하는지 확인 |
-| `channel_not_found` 오류 | 채널 ID가 `C`로 시작하는지 확인 |
-| Hook 미작동 | `~/.claude/settings.json` JSON 문법 오류 확인 |
-| jq 없음 | `brew install jq` 실행 |
+| No notification arrives | Check the environment variable with `echo $SLACK_BOT_TOKEN` |
+| `not_in_channel` error | Confirm the bot was invited to the channel (`/invite @bot-name`) |
+| `invalid_auth` error | Confirm the token starts with `xoxb-` |
+| `channel_not_found` error | Confirm the Channel ID starts with `C` |
+| Hook not working | Check for JSON syntax errors in `~/.claude/settings.json` |
+| jq missing | Run `brew install jq` |
 
-## 환경 변수
+## Environment Variables
 
-| 변수명 | 설명 | 기본값 |
+| Variable | Description | Default |
 |--------|------|--------|
-| `SLACK_BOT_TOKEN` | Slack Bot OAuth Token (`xoxb-...`) | (필수) |
-| `SLACK_CHANNEL` | 알림 받을 채널 ID | (필수) |
-| `CLAUDE_SLACK_NOTIFY_ENABLED` | `false`로 설정 시 비활성화 | `true` |
+| `SLACK_BOT_TOKEN` | Slack Bot OAuth Token (`xoxb-...`) | (required) |
+| `SLACK_CHANNEL` | Channel ID to receive notifications | (required) |
+| `CLAUDE_SLACK_NOTIFY_ENABLED` | Disabled when set to `false` | `true` |
 
-> **비활성화**: `export CLAUDE_SLACK_NOTIFY_ENABLED=false`
+> **Disable**: `export CLAUDE_SLACK_NOTIFY_ENABLED=false`
 
-## 의존성
+## Dependencies
 
-- `jq` - JSON 파싱용
-- `curl` - HTTP 요청용
+- `jq` - for JSON parsing
+- `curl` - for HTTP requests
 
 ```bash
 # macOS
